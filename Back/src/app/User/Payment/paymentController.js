@@ -1,69 +1,56 @@
-const jwtMiddleware = require("../../../../config/jwtMiddleware");
 const paymentProvider = require("./paymentProvider");
 const paymentService = require("./paymentService");
 const baseResponse = require("../../../../config/baseResponseStatus");
-const {response, errResponse} = require("../../../../config/response");
-const {pool} = require("../../../../config/database");
+const { response, errResponse } = require("../../../../config/response");
 
-exports.getCarts = async function(req,res){
+exports.getCarts = async function (req, res) {
+	const token = req.verifiedToken;
+	const { userId } = token;
 
-    const token = req.verifiedToken;
-    const userId = token.userId;
+	const getCartsItemResult = await paymentProvider.getCartsItem(userId);
 
-    const getCartsItemResult = await paymentProvider.getCartsItem(userId);
+	return res.send(response(baseResponse.SUCCESS("수강 바구니 조회에 성공했습니다"), getCartsItemResult));
+};
 
-    return res.send(response(baseResponse.SUCCESS("수강 바구니 조회에 성공했습니다"),getCartsItemResult));
+exports.deleteItems = async function (req, res) {
+	const token = req.verifiedToken;
+	const { userId } = token;
+	const { lectureId } = req.params;
 
-}
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-exports.deleteItems = async function(req,res){
+	const deleteCartItemsResult = await paymentService.deleteCartItem(userId, lectureId);
 
-    const token = req.verifiedToken;
-    const userId = token.userId;
-    const lectureId = req.params.lectureId;
+	return res.send(deleteCartItemsResult);
+};
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+exports.addItem = async function (req, res) {
+	const token = req.verifiedToken;
+	const { userId } = token;
+	const { lectureId } = req.params;
 
-    const deleteCartItemsResult = await paymentService.deleteCartItem(userId,lectureId);
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    return res.send(deleteCartItemsResult);
+	const postCartItemResult = await paymentService.postCartItem(userId, lectureId);
 
+	return res.send(postCartItemResult);
+};
 
-}
+exports.getReceipt = async function (req, res) {
+	const token = req.verifiedToken;
+	const { userId } = token;
 
-exports.addItem = async function(req,res){
-    const token = req.verifiedToken;
-    const userId = token.userId;
-    const lectureId = req.params.lectureId;
+	const getReceipt = await paymentProvider.getReceiptHistory(userId);
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+	return res.send(getReceipt);
+};
 
-    const postCartItemResult = await paymentService.postCartItem(userId,lectureId);
+exports.deleteReceipt = async function (req, res) {
+	const token = req.verifiedToken;
+	const { userId } = token;
+	const userBuyId = req.params.buyId;
 
-    return res.send(postCartItemResult);
+	const deleteReceipt = await paymentService.deleteReceipt(userId, userBuyId);
 
-}
-
-exports.getReceipt = async function(req,res){
-
-    const token = req.verifiedToken;
-    const userId = token.userId;
-
-    const getReceipt = await paymentProvider.getReceiptHistory(userId);
-
-    return res.send(getReceipt);
-
-}
-
-exports.deleteReceipt = async function(req,res){
-
-    const token = req.verifiedToken;
-    const userId = token.userId;
-    const userBuyId = req.params.buyId;
-
-    const deleteReceipt = await paymentService.deleteReceipt(userId,userBuyId);
-
-    return res.send(deleteReceipt)
-}
+	return res.send(deleteReceipt);
+};

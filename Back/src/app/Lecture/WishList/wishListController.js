@@ -1,80 +1,64 @@
-const jwtMiddleware = require("../../../../config/jwtMiddleware");
 const wishListProvider = require("./wishListProvider");
 const wishListService = require("./wishListService");
 const baseResponse = require("../../../../config/baseResponseStatus");
-const {response, errResponse} = require("../../../../config/response");
-const {pool} = require("../../../../config/database");
+const { response, errResponse } = require("../../../../config/response");
 
-exports.postWishListItem = async function(req, res) {
+exports.postWishListItem = async function (req, res) {
+	const token = req.verifiedToken;
 
-    const token = req.verifiedToken;
+	const { userId } = token;
 
-    const userId = token.userId;
+	const { lectureId } = req.body;
 
-    const lectureId = req.body.lectureId;
+	let wishListId;
 
-    const wishListCheckRows = await wishListProvider.selectUserWishList(userId);
+	const wishListCheckRows = await wishListProvider.selectUserWishList(userId);
 
-    let wishListId;
+	if (wishListCheckRows.length < 1) {
+		wishListId = await wishListService.createWishList(userId);
+	} else {
+		wishListId = wishListCheckRows[0].WISH_LIST_ID;
+	}
 
-    if(wishListCheckRows.length < 1){
-        wishListId = await wishListService.createWishList(userId);
-    }else{
-        wishListId = wishListCheckRows[0].WISH_LIST_ID;
-    }
+	const insertResult = await wishListService.insertWishListItem(wishListId, lectureId);
 
-    const insertResult = await wishListService.insertWishListItem(wishListId, lectureId)
+	return res.send(insertResult);
+};
 
-    return res.send(insertResult);
-}
+exports.getWishListItem = async function (req, res) {
+	const token = req.verifiedToken;
 
-exports.getWishListItem = async function(req, res) {
+	const { userId } = token;
 
-    const token = req.verifiedToken;
+	const wishListCheckRows = await wishListProvider.selectUserWishList(userId);
 
-    const userId = token.userId;
+	if (wishListCheckRows.length < 1) return res.send(errResponse(baseResponse.USER_WISH_LIST_NOT_EXIST));
 
-    const lectureId = req.body.lectureId;
+	const wishListId = wishListCheckRows[0].WISH_LIST_ID;
 
-    const wishListCheckRows = await wishListProvider.selectUserWishList(userId);
+	const selectResult = await wishListProvider.selectWishListItems(wishListId);
 
-    let wishListId;
+	return res.send(response(baseResponse.SUCCESS("위시리스트 조회에 성공하였습니다"), selectResult));
+};
 
-    if(wishListCheckRows.length < 1){
-        return res.send(errResponse(baseResponse.USER_WISH_LIST_NOT_EXIST));
-    }else{
-        wishListId = wishListCheckRows[0].WISH_LIST_ID;
-    }
+exports.deleteWishListItem = async function (req, res) {
+	const token = req.verifiedToken;
 
-    const selectResult = await wishListProvider.selectWishListItems(wishListId);
+	const { userId } = token;
 
-    return res.send(selectResult);
-}
+	const { lectureId } = req.body;
 
-exports.deleteWishListItem = async function(req, res) {
+	const wishListCheckRows = await wishListProvider.selectUserWishList(userId);
 
-    const token = req.verifiedToken;
+	if (wishListCheckRows.length < 1) return res.send(errResponse(baseResponse.USER_WISH_LIST_NOT_EXIST));
 
-    const userId = token.userId;
+	const wishListId = wishListCheckRows[0].WISH_LIST_ID;
 
-    const lectureId = req.body.lectureId;
+	const checkResult = await wishListProvider.checkWishListItem(lectureId, wishListId);
 
-    const wishListCheckRows = await wishListProvider.selectUserWishList(userId);
+	if (checkResult.length < 1) return res.send(errResponse(baseResponse.USER_WISH_LIST_ITEM_NOT_EXIST));
 
-    let wishListId;
+	const deleteResult = await wishListService.deleteWishListItem(wishListId, lectureId);
 
-    if(wishListCheckRows.length < 1){
-        return res.send(errResponse(baseResponse.USER_WISH_LIST_NOT_EXIST));
-    }else{
-        wishListId = wishListCheckRows[0].WISH_LIST_ID;
-    }
-
-    const checkResult = await wishListProvider.checkWishListItem(lectureId, wishListId);
-
-    if(checkResult.length < 1)
-        return res.send(errResponse(baseResponse.USER_WISH_LIST_ITEM_NOT_EXIST));
-
-    const deleteResult = await wishListService.deleteWishListItem(wishListId, lectureId);
-
-    return res.send(deleteResult);
-}
+	return res.send(deleteResult);
+};

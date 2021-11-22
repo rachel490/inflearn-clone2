@@ -1,5 +1,5 @@
-async function selectBoardList(connection,type,start,pageSize) {
-    const selectBoardsListQuery = `
+async function selectBoardList(connection, type, start, pageSize) {
+	const selectBoardsListQuery = `
     select 
         BOARDS.BOARD_ID,BOARD_TITLE,NICK_NAME, BOARD_CONTENT,
         LECTURE_NAME,CLASS_NAME,date_format(BOARDS.UPDATED_AT,'%Y년 %m월 %d일') as DATE,
@@ -14,15 +14,13 @@ left join ANSWERS A on BOARDS.BOARD_ID = A.BOARD_ID
         group by BOARDS.BOARD_ID
         limit ?,?;
     `;
-    console.log(start,pageSize);
 
-    const [resultRow] = await connection.query(selectBoardsListQuery,[type,start,pageSize]);
-    return resultRow;
-
+	const [resultRow] = await connection.query(selectBoardsListQuery, [type, start, pageSize]);
+	return resultRow;
 }
 
-async function selectSortedBoardList(connection,type,orderBy,start,pageSize){
-    const query = `
+async function selectSortedBoardList(connection, type, orderBy, start, pageSize) {
+	const query = `
     select 
         BOARDS.BOARD_ID,BOARD_TITLE,NICK_NAME, BOARD_CONTENT,
         LECTURE_NAME,CLASS_NAME,date_format(BOARDS.UPDATED_AT,'%Y년 %m월 %d일') as DATE,
@@ -36,63 +34,61 @@ left join ANSWERS A on BOARDS.BOARD_ID = A.BOARD_ID
     where BOARD_TYPE = ? AND BOARDS.STATUS = 'active'
         group by BOARDS.BOARD_ID
     `;
-    let limitQuery = ' limit ' + start + ',' + pageSize + ';';
-    let selectBoardsListQuery = query + orderBy + limitQuery;
+	const limitQuery = ` limit ${start},${pageSize};`;
+	const selectBoardsListQuery = query + orderBy + limitQuery;
 
-    const [resultRow] = await connection.query(selectBoardsListQuery,[type,orderBy,start,pageSize]);
+	const [resultRow] = await connection.query(selectBoardsListQuery, [type, orderBy, start, pageSize]);
 
-    return resultRow;
+	return resultRow;
 }
 
-async function boardListLength(connection,type) {
-    const getLengthQuery = `
+async function boardListLength(connection, type) {
+	const getLengthQuery = `
     select count(BOARD_ID) as Length from BOARDS where BOARD_TYPE = ? AND STATUS = 'active';
-    `
+    `;
 
-    const [resultRow] = await connection.query(getLengthQuery,type);
-    return resultRow;
+	const [resultRow] = await connection.query(getLengthQuery, type);
+	return resultRow;
 }
 
-
-async function insertBoard(connection,params){
-    let insertBoardQuery;
-    if(params.length < 6) {
-        insertBoardQuery = `
+async function insertBoard(connection, params) {
+	let insertBoardQuery;
+	if (params.length < 6) {
+		insertBoardQuery = `
             insert into BOARDS(USER_ID,BOARD_TITLE,BOARD_CONTENT,BOARD_TYPE,BOARD_TYPE_DESCRIPTION) 
             values (?,?,?,?,?);
         `;
-    }else{
-        insertBoardQuery = `
+	} else {
+		insertBoardQuery = `
             insert into BOARDS(CLASS_ID,USER_ID,BOARD_TITLE,BOARD_CONTENT,BOARD_TYPE,BOARD_TYPE_DESCRIPTION) 
             values (?,?,?,?,?,?);
         `;
-    }
+	}
 
-    const result = await connection.query(insertBoardQuery,params);
-    return result;
+	const result = await connection.query(insertBoardQuery, params);
+	return result;
 }
 
-async function checkQuestionBoard(connection,boardId){
-    const checkQuestionQuery = `
+async function checkQuestionBoard(connection, boardId) {
+	const checkQuestionQuery = `
     select BOARD_ID from BOARDS where BOARD_ID = ? AND STATUS = 'active';
     `;
 
-    const [resultRow] = await connection.query(checkQuestionQuery,boardId);
-    return resultRow;
+	const [resultRow] = await connection.query(checkQuestionQuery, boardId);
+	return resultRow;
 }
 
-async function checkQuestionBoardIsMine(connection,boardId,userId){
-    const checkQuestionIsMine = `
+async function checkQuestionBoardIsMine(connection, boardId, userId) {
+	const checkQuestionIsMine = `
     select BOARD_ID from BOARDS where BOARD_ID = ? AND USER_ID = ? AND STATUS = 'active';
     `;
 
-    const [resultRow] = await connection.query(checkQuestionIsMine,[boardId,userId]);
-    return resultRow;
+	const [resultRow] = await connection.query(checkQuestionIsMine, [boardId, userId]);
+	return resultRow;
 }
 
-async function updateQuestionBoard(connection,params) {
-
-    const updateQuestionQuery = `
+async function updateQuestionBoard(connection, params) {
+	const updateQuestionQuery = `
     update BOARDS set 
         BOARD_TITLE = ? ,BOARD_CONTENT = ? 
     where BOARD_ID = ? 
@@ -100,35 +96,34 @@ async function updateQuestionBoard(connection,params) {
         AND STATUS = 'active';
     `;
 
-    const result = await connection.query(updateQuestionQuery,params);
-    return result;
+	const result = await connection.query(updateQuestionQuery, params);
+	return result;
 }
 
-async function checkBoardType(connection,boardId) {
-    const checkBoardTypeQuery = `
+async function checkBoardType(connection, boardId) {
+	const checkBoardTypeQuery = `
     select 
         BOARD_TYPE,BOARD_TYPE_DESCRIPTION
     from BOARDS
         where BOARD_ID = ? AND STATUS = 'active';
     `;
 
-    const [resultRow] = await connection.query(checkBoardTypeQuery,boardId);
-    return resultRow;
+	const [resultRow] = await connection.query(checkBoardTypeQuery, boardId);
+	return resultRow;
 }
 
-async function deleteBoard(connection,boardId) {
-    const deleteBoardQuery = `
+async function deleteBoard(connection, boardId) {
+	const deleteBoardQuery = `
     update BOARDS set STATUS = 'delete' where BOARD_ID = ? AND STATUS = 'active';
     `;
 
-    const result = await connection.query(deleteBoardQuery,boardId);
+	const result = await connection.query(deleteBoardQuery, boardId);
 
-    return result
+	return result;
 }
 
-
 async function selectClassBoard(connection, params) {
-    const selectClassBoardQuery = `
+	const selectClassBoardQuery = `
         SELECT B.BOARD_ID, B.BOARD_TITLE, B.BOARD_CONTENT, U.NICK_NAME, IFNULL(COMMENTS.COMMENT_CNT, 0)
         FROM BOARDS AS B
             INNER JOIN LECTURE_CLASSES AS C
@@ -142,15 +137,12 @@ async function selectClassBoard(connection, params) {
         WHERE B.BOARD_TYPE = ? AND B.CLASS_ID = ?;
     `;
 
-    const [result] = await connection.query(
-        selectClassBoardQuery,
-        params
-    );
+	const [result] = await connection.query(selectClassBoardQuery, params);
 
-    return result
+	return result;
 }
-async function selectBoardInfo(connection,boardId,type){
-    const selectBoardQuery = `
+async function selectBoardInfo(connection, boardId, type) {
+	const selectBoardQuery = `
     select 
         BOARDS.BOARD_ID,BOARD_TITLE, BOARD_CONTENT,
         date_format(BOARDS.UPDATED_AT,'%Y.%m.%d') as DATE,
@@ -163,25 +155,23 @@ async function selectBoardInfo(connection,boardId,type){
     left join LECTURES L on LS.LECTURE_ID = L.LECTURE_ID
     left  join ANSWERS A on BOARDS.BOARD_ID = A.BOARD_ID
         where BOARDS.BOARD_ID = ? AND BOARD_TYPE = ? AND BOARDS.STATUS = 'active'
-group by BOARDS.BOARD_ID;
+    group by BOARDS.BOARD_ID;
     `;
 
-    const [resultRow] = await connection.query(selectBoardQuery,[boardId,type]);
-    return resultRow;
-
+	const [resultRow] = await connection.query(selectBoardQuery, [boardId, type]);
+	return resultRow;
 }
 
 module.exports = {
-    selectBoardList,
-    insertBoard,
-    checkQuestionBoard,
-    checkQuestionBoardIsMine,
-    updateQuestionBoard,
-    checkBoardType,
-    deleteBoard,
-    selectClassBoard,
-    selectBoardInfo,
-    selectSortedBoardList,
-    boardListLength
-
-}
+	selectBoardList,
+	insertBoard,
+	checkQuestionBoard,
+	checkQuestionBoardIsMine,
+	updateQuestionBoard,
+	checkBoardType,
+	deleteBoard,
+	selectClassBoard,
+	selectBoardInfo,
+	selectSortedBoardList,
+	boardListLength,
+};

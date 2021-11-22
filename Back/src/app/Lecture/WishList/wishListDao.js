@@ -1,45 +1,36 @@
 async function insertWishList(connection, userId) {
-    const insertWishListQuery = `
+	const insertWishListQuery = `
        INSERT INTO WISH_LISTS(USER_ID) VALUES (?);
     `;
 
-    const [insertWishListResult] = await connection.query(
-        insertWishListQuery,
-        userId
-    );
+	const [insertWishListResult] = await connection.query(insertWishListQuery, userId);
 
-    return insertWishListResult;
+	return insertWishListResult;
 }
 
 async function selectWishList(connection, userId) {
-    const selectWishListQuery = `
+	const selectWishListQuery = `
         SELECT WISH_LIST_ID, USER_ID
         FROM WISH_LISTS
         WHERE USER_ID = ?;
-    `
-    const [selectWishListResult] = await connection.query(
-        selectWishListQuery,
-        userId
-    );
+    `;
+	const [selectWishListResult] = await connection.query(selectWishListQuery, userId);
 
-    return selectWishListResult;
+	return selectWishListResult;
 }
 
 async function insertWishListItem(connection, wishListId, lectureId) {
-    const insertWishListItemQuery = `
+	const insertWishListItemQuery = `
         INSERT INTO WISH_LIST_ITEM(LECTURE_ID, WISH_LIST_ID)
         VALUES (?, ?);
-    `
-    const [resultRows] = await connection.query(
-        insertWishListItemQuery,
-        [lectureId, wishListId]
-    );
+    `;
+	const [resultRows] = await connection.query(insertWishListItemQuery, [lectureId, wishListId]);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function selectWishListItems(connection, wishListId) {
-    const selectWishListQuery = `
+	const selectWishListQuery = `
         SELECT LECTURES.LECTURE_ID, LECTURES.LECTURE_NAME, LECTURES.TITLE_IMAGE, LECTURES.PRICE, USERS.NICK_NAME
         FROM WISH_LIST_ITEM AS WISH 
             INNER JOIN LECTURES
@@ -49,48 +40,39 @@ async function selectWishListItems(connection, wishListId) {
         WHERE WISH_LIST_ID = ?;
     `;
 
-    const [selectWishListResult] = await connection.query(
-        selectWishListQuery,
-        wishListId
-    );
+	const [selectWishListResult] = await connection.query(selectWishListQuery, wishListId);
 
-    return selectWishListResult;
+	return selectWishListResult;
 }
 
-async function selectWishListItem(connection, lectureId, wishListId){
-    const selectWishListQuery = `
+async function selectWishListItem(connection, lectureId, wishListId) {
+	const selectWishListQuery = `
         SELECT WISH_LIST_ID, LECTURE_ID
         FROM WISH_LIST_ITEM
         WHERE LECTURE_ID = ? AND WISH_LIST_ID = ?;
     `;
 
-    const [resultRows] = await connection.query(
-        selectWishListQuery,
-        [lectureId, wishListId]
-    );
+	const [resultRows] = await connection.query(selectWishListQuery, [lectureId, wishListId]);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function deleteWishListItems(connection, lectureId, wishListId) {
-    const deleteWishList = `
+	const deleteWishList = `
         DELETE
         FROM WISH_LIST_ITEM
         WHERE LECTURE_ID = ? AND WISH_LIST_ID = ?;
     `;
 
-    const [resultRows] = await connection.query(
-        deleteWishList,
-        [lectureId, wishListId]
-    );
+	const [resultRows] = await connection.query(deleteWishList, [lectureId, wishListId]);
 
-    return resultRows;
+	return resultRows;
 }
 module.exports = {
-    insertWishList,
-    selectWishList,
-    insertWishListItem,
-    selectWishListItems,
-    deleteWishListItems,
-    selectWishListItem
-}
+	insertWishList,
+	selectWishList,
+	insertWishListItem,
+	selectWishListItems,
+	deleteWishListItems,
+	selectWishListItem,
+};
