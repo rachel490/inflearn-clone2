@@ -1,20 +1,18 @@
 async function buildQuery(tags) {
-    let initial = 'CATEGORY_TAG_NAME = ' + "'" + tags[0] + "'";
-    let string = [];
+	const initial = `${"CATEGORY_TAG_NAME = " + "'"}${tags[0]}'`;
+	let string = [];
 
-
-    for(let i=1;i<tags.length;i++){
-        if(i !== tags.length){
-            string += (' OR' + ' CATEGORY_TAG_NAME = ' + "'" + tags[i] + "'");
-        }
-    }
-    let query = initial + string;
-    return query;
+	for (let i = 1; i < tags.length; i++) {
+		if (i !== tags.length) {
+			string += `${" OR" + " CATEGORY_TAG_NAME = " + "'"}${tags[i]}'`;
+		}
+	}
+	const query = initial + string;
+	return query;
 }
 
-
-async function selectLectureList (connection){
-    const lectureListQuery = `
+async function selectLectureList(connection) {
+	const lectureListQuery = `
     select distinct 
         LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,STAR_POINT,
         SALE_PERCENT,PRICE,U.NICK_NAME,LEARNING_LEVEL,
@@ -25,25 +23,24 @@ async function selectLectureList (connection){
     inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID;
     `;
 
-    const [lectureListResult] = await connection.query(lectureListQuery);
-    return lectureListResult;
+	const [lectureListResult] = await connection.query(lectureListQuery);
+	return lectureListResult;
 }
 
-
-async function checkBigCategory(connection,bigCategoryName){
-    const checkQuery = `
+async function checkBigCategory(connection, bigCategoryName) {
+	const checkQuery = `
     select 
         BIG_CATEGORY_NAME 
     from LECTURE_TOP_CATEGORIES
         where BIG_CATEGORY_NAME = ?;
     `;
 
-    const [resultRow] = await connection.query(checkQuery,bigCategoryName);
-    return resultRow;
+	const [resultRow] = await connection.query(checkQuery, bigCategoryName);
+	return resultRow;
 }
 
-async function selectTopLectureList(connection,bigCategoryName){
-    const topLectureListQuery = `
+async function selectTopLectureList(connection, bigCategoryName) {
+	const topLectureListQuery = `
     select distinct 
         LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
         STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
@@ -55,12 +52,12 @@ async function selectTopLectureList(connection,bigCategoryName){
     where BIG_CATEGORY_NAME = ?;
     `;
 
-    const [resultRows] = await connection.query(topLectureListQuery,bigCategoryName);
-    return resultRows;
+	const [resultRows] = await connection.query(topLectureListQuery, bigCategoryName);
+	return resultRows;
 }
 
-async function filterBigLectureList(connection,bigCategoryName,where){
-    let query =`
+async function filterBigLectureList(connection, bigCategoryName, where) {
+	const query = `
     select distinct 
         LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
         STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
@@ -72,14 +69,14 @@ async function filterBigLectureList(connection,bigCategoryName,where){
     inner join MIDDLE_CATEGORY_TAGS AS TAG ON LT.CATEGORY_TAG_ID = TAG.CATEGORY_TAG_ID
     where BIG_CATEGORY_NAME `;
 
-    let bigCategoryLectureQuery = query + ' = ' + "'" + bigCategoryName + "'" + ' AND (' + where + ' );';
-    const [resultRow] = await connection.query(bigCategoryLectureQuery);
+	const bigCategoryLectureQuery = `${query} = ` + `'${bigCategoryName}'` + ` AND (${where} );`;
+	const [resultRow] = await connection.query(bigCategoryLectureQuery);
 
-    return resultRow;
+	return resultRow;
 }
 
-async function selectLectureTag(connection,lectureId){
-    const lectureTagQuery = `
+async function selectLectureTag(connection, lectureId) {
+	const lectureTagQuery = `
     select distinct
         LT.LECTURE_ID,MCT.CATEGORY_TAG_NAME 
     from LECTURES
@@ -88,14 +85,13 @@ async function selectLectureTag(connection,lectureId){
     where LT.LECTURE_ID = ?;
     `;
 
-    const [lectureTagResult] = await connection.query(lectureTagQuery,lectureId);
+	const [lectureTagResult] = await connection.query(lectureTagQuery, lectureId);
 
-    return lectureTagResult;
+	return lectureTagResult;
 }
 
-
-async function filterLectureList(connection,where) {
-    let query = `
+async function filterLectureList(connection, where) {
+	const query = `
     select distinct 
         LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,STAR_POINT,
         SALE_PERCENT,PRICE,U.NICK_NAME,LEARNING_LEVEL,
@@ -107,17 +103,15 @@ async function filterLectureList(connection,where) {
     inner join MIDDLE_CATEGORY_TAGS AS TAG ON LT.CATEGORY_TAG_ID = TAG.CATEGORY_TAG_ID
     where `;
 
-    let lectureListQuery = query + where + ';';
+	const lectureListQuery = `${query + where};`;
 
+	const [resultRow] = await connection.query(lectureListQuery);
 
-    const [resultRow] = await connection.query(lectureListQuery);
-
-    return resultRow;
+	return resultRow;
 }
 
-
-async function selectLectureMiddle(connection,lectureId){
-    const lectureMiddleQuery = `
+async function selectLectureMiddle(connection, lectureId) {
+	const lectureMiddleQuery = `
     select distinct 
         LMC.MIDDLE_CATEGORY_NAME 
     from LECTURE_TAGS LT
@@ -126,14 +120,13 @@ async function selectLectureMiddle(connection,lectureId){
     order by LECTURE_ID asc;
     `;
 
-    const [lectureMiddleResult] = await connection.query(lectureMiddleQuery,lectureId);
+	const [lectureMiddleResult] = await connection.query(lectureMiddleQuery, lectureId);
 
-    return lectureMiddleResult;
+	return lectureMiddleResult;
 }
 
-async function selectTopLectureMiddle(connection,topCategoryName) {
-
-    const lectureMiddleQuery = `
+async function selectTopLectureMiddle(connection, topCategoryName) {
+	const lectureMiddleQuery = `
     select distinct
         LECTURE_ID,MIDDLE_CATEGORY_NAME 
     from LECTURE_TAGS
@@ -142,13 +135,12 @@ async function selectTopLectureMiddle(connection,topCategoryName) {
         where BIG_CATEGORY_NAME = ?;
     `;
 
-    const [resultRows] = await connection.query(lectureMiddleQuery,topCategoryName);
-    return resultRows;
-
+	const [resultRows] = await connection.query(lectureMiddleQuery, topCategoryName);
+	return resultRows;
 }
 
-async function selectTopLectureTag(connection,topCategoryName) {
-    const lectureTagQuery = `
+async function selectTopLectureTag(connection, topCategoryName) {
+	const lectureTagQuery = `
     select distinct 
         LECTURE_ID, MCT.CATEGORY_TAG_NAME 
     from LECTURE_TAGS
@@ -158,13 +150,13 @@ async function selectTopLectureTag(connection,topCategoryName) {
         where BIG_CATEGORY_NAME = ?;
     `;
 
-    const [resultRows] = await connection.query(lectureTagQuery,topCategoryName);
+	const [resultRows] = await connection.query(lectureTagQuery, topCategoryName);
 
-    return resultRows;
+	return resultRows;
 }
 
-async function selectMiddleLectureList(connection,bigCategoryName,middleCategoryName) {
-    let topMiddleLectureQuery = `
+async function selectMiddleLectureList(connection, bigCategoryName, middleCategoryName) {
+	const topMiddleLectureQuery = `
     select distinct 
         LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
         STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
@@ -178,12 +170,12 @@ async function selectMiddleLectureList(connection,bigCategoryName,middleCategory
         where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ? ;
     `;
 
-    const [resultRows] = await connection.query(topMiddleLectureQuery,[bigCategoryName,middleCategoryName]);
-    return resultRows;
+	const [resultRows] = await connection.query(topMiddleLectureQuery, [bigCategoryName, middleCategoryName]);
+	return resultRows;
 }
 
-async function filterMiddleLectureList(connection,bigCategoryName,middleCategoryName,where) {
-     let query = `
+async function filterMiddleLectureList(connection, bigCategoryName, middleCategoryName, where) {
+	const query = `
     select distinct 
         LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
         STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
@@ -196,16 +188,20 @@ async function filterMiddleLectureList(connection,bigCategoryName,middleCategory
     inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
         where `;
 
-    const topMiddleLectureQuery = query + 'BIG_CATEGORY_NAME = '+ "'" + bigCategoryName + "'" +
-        ' AND ' + 'MIDDLE_CATEGORY_NAME = ' + "'" + middleCategoryName + "'" +
-        ' AND (' + where + ' );';
+	const topMiddleLectureQuery =
+		`${query}BIG_CATEGORY_NAME = ` +
+		`'${bigCategoryName}'` +
+		" AND " +
+		"MIDDLE_CATEGORY_NAME = " +
+		`'${middleCategoryName}'` +
+		` AND (${where} );`;
 
-    const [resultRows] = await connection.query(topMiddleLectureQuery);
-    return resultRows;
+	const [resultRows] = await connection.query(topMiddleLectureQuery);
+	return resultRows;
 }
 
-async function selectMiddleLecture(connection,bigCategoryName,middleCategoryName) {
-    const middleLectureQuery =`
+async function selectMiddleLecture(connection, bigCategoryName, middleCategoryName) {
+	const middleLectureQuery = `
     select distinct 
         LT.LECTURE_ID, LMC.MIDDLE_CATEGORY_NAME
     from LECTURE_TAGS LT
@@ -219,15 +215,12 @@ INNER JOIN (SELECT LECTURE_ID, LECTURE_TAGS.MIDDLE_CATEGORY_ID
     ON SUB.LECTURE_ID = LT.LECTURE_ID
 where BIG_CATEGORY_NAME = ?;
     `;
-    const [resultRows] = await connection.query(
-        middleLectureQuery,
-        [middleCategoryName,bigCategoryName]
-    );
-    return resultRows;
+	const [resultRows] = await connection.query(middleLectureQuery, [middleCategoryName, bigCategoryName]);
+	return resultRows;
 }
 
-async function selectMiddleLectureTag(connection,bigCategoryName,middleCategoryName) {
-    const tagLectureQuery = `
+async function selectMiddleLectureTag(connection, bigCategoryName, middleCategoryName) {
+	const tagLectureQuery = `
     select 
         L.LECTURE_ID,CATEGORY_TAG_NAME 
     from LECTURE_TAGS
@@ -238,12 +231,12 @@ async function selectMiddleLectureTag(connection,bigCategoryName,middleCategoryN
         where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ?;
     `;
 
-    const [resultRow] = await connection.query(tagLectureQuery,[bigCategoryName,middleCategoryName]);
-    return resultRow;
+	const [resultRow] = await connection.query(tagLectureQuery, [bigCategoryName, middleCategoryName]);
+	return resultRow;
 }
 
-async function checkMiddleCategory(connection,bigCategoryName,middleCategoryName){
-    const checkQuery = `
+async function checkMiddleCategory(connection, bigCategoryName, middleCategoryName) {
+	const checkQuery = `
     select distinct 
         MIDDLE_CATEGORY_NAME 
     from LECTURE_MIDDLE_CATEGORIES
@@ -252,40 +245,34 @@ async function checkMiddleCategory(connection,bigCategoryName,middleCategoryName
         where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ?;
     `;
 
-    const [resultRow] = await connection.query(checkQuery,[bigCategoryName,middleCategoryName]);
-    return resultRow;
+	const [resultRow] = await connection.query(checkQuery, [bigCategoryName, middleCategoryName]);
+	return resultRow;
 }
 
 async function selectUserHaveLecture(connection, id, lectureId) {
-    const selectUserHaveLectureQuery = `
+	const selectUserHaveLectureQuery = `
         SELECT LECTURE_ID, USER_ID
         FROM USER_BUY_HISTORIES
         WHERE USER_ID = ? AND LECTURE_ID = ?;
   `;
 
-    const [resultRow] = await connection.query(
-        selectUserHaveLectureQuery,
-        [id, lectureId]
-    );
-    return resultRow;
+	const [resultRow] = await connection.query(selectUserHaveLectureQuery, [id, lectureId]);
+	return resultRow;
 }
 
 async function selectLecture(connection, lectureId) {
-    const selectUserQuery = `
+	const selectUserQuery = `
         SELECT LECTURE_ID, LECTURE_NAME
         FROM LECTURES
         WHERE LECTURE_ID = ?;
   `;
-    const [resultRow] = await connection.query(
-        selectUserQuery,
-        lectureId
-    );
+	const [resultRow] = await connection.query(selectUserQuery, lectureId);
 
-    return resultRow;
+	return resultRow;
 }
 
 async function selectLectureHeader(connection, lectureId) {
-    const selectLectureHeaderQuery = `
+	const selectLectureHeaderQuery = `
         SELECT LEC.LECTURE_NAME, LEC.TITLE_IMAGE, LEC.STAR_POINT, U.NICK_NAME
         FROM LECTURES AS LEC
                  INNER JOIN USERS AS U
@@ -293,31 +280,25 @@ async function selectLectureHeader(connection, lectureId) {
         WHERE LEC.LECTURE_ID = ?;
     `;
 
-    const [resultRow] = await connection.query(
-        selectLectureHeaderQuery,
-        lectureId
-    );
+	const [resultRow] = await connection.query(selectLectureHeaderQuery, lectureId);
 
-    return resultRow;
+	return resultRow;
 }
 
 async function selectLectureStudentCount(connection, lectureId) {
-    const selectLectureStudentCountQuery = `
+	const selectLectureStudentCountQuery = `
         SELECT COUNT(USER_ID) AS STUDENTS_CNT
         FROM USER_CLASS_HISTORIES
         WHERE LECTURE_ID = ?;
     `;
 
-    const [resultRow] = await connection.query(
-        selectLectureStudentCountQuery,
-        lectureId
-    );
+	const [resultRow] = await connection.query(selectLectureStudentCountQuery, lectureId);
 
-    return resultRow;
+	return resultRow;
 }
 
 async function selectLecturePreviewCount(connection, lectureId) {
-    const selectLecturePreviewCountQuery = `
+	const selectLecturePreviewCountQuery = `
         SELECT COUNT(CLASS_ID) AS PREVIEWS
         FROM LECTURE_CLASSES AS C 
             INNER JOIN LECTURE_SESSION AS S
@@ -325,16 +306,13 @@ async function selectLecturePreviewCount(connection, lectureId) {
         WHERE S.LECTURE_ID = ? AND C.CLASS_ROLE_ID = 1;
     `;
 
-    const [resultRow] = await connection.query(
-        selectLecturePreviewCountQuery,
-        lectureId
-    );
+	const [resultRow] = await connection.query(selectLecturePreviewCountQuery, lectureId);
 
-    return resultRow;
+	return resultRow;
 }
 
 async function selectLectureCategory(connection, lectureId) {
-    const selectLectureCategoryQuery = `
+	const selectLectureCategoryQuery = `
     SELECT DISTINCT TOP_CT.BIG_CATEGORY_NAME, MIDDLE_CT.MIDDLE_CATEGORY_NAME
     FROM LECTURE_MIDDLE_CATEGORIES AS MIDDLE_CT 
         INNER JOIN LECTURE_TOP_CATEGORIES AS TOP_CT
@@ -344,16 +322,13 @@ async function selectLectureCategory(connection, lectureId) {
     WHERE LECT_TAG.LECTURE_ID = ?;
     `;
 
-    const [resultRow] = await connection.query(
-        selectLectureCategoryQuery,
-        lectureId
-    );
+	const [resultRow] = await connection.query(selectLectureCategoryQuery, lectureId);
 
-    return resultRow;
+	return resultRow;
 }
 
 async function selectLectureTags(connection, lectureId) {
-    const selectLectureTagQuery = `
+	const selectLectureTagQuery = `
         SELECT MIDDLE_TAG.CATEGORY_TAG_ID, MIDDLE_TAG.CATEGORY_TAG_NAME
         FROM MIDDLE_CATEGORY_TAGS AS MIDDLE_TAG
             INNER JOIN LECTURE_TAGS AS LECTURE_TAG
@@ -361,62 +336,49 @@ async function selectLectureTags(connection, lectureId) {
         WHERE LECTURE_TAG.LECTURE_ID = ?;
     `;
 
-    const [lectureTagRows] = await connection.query(
-        selectLectureTagQuery,
-        lectureId
-    );
+	const [lectureTagRows] = await connection.query(selectLectureTagQuery, lectureId);
 
-    return lectureTagRows;
+	return lectureTagRows;
 }
 
-
 async function selectLectureIntroduction(connection, lectureId) {
-    const selectIntroductionQuery = `
+	const selectIntroductionQuery = `
         SELECT INTRODUCTION
         FROM LECTURES
         WHERE LECTURE_ID = ?;
     `;
 
-    const [lectureIntroductionRows] = await connection.query(
-        selectIntroductionQuery,
-        lectureId
-    );
+	const [lectureIntroductionRows] = await connection.query(selectIntroductionQuery, lectureId);
 
-    return lectureIntroductionRows;
+	return lectureIntroductionRows;
 }
 
 async function selectLectureSession(connection, lectureId) {
-    const selectLectureSessionQuery = `
+	const selectLectureSessionQuery = `
         SELECT SESSION_ID, SESSION_NAME, SESSION_TOTAL_TIME
         FROM LECTURE_SESSION
         WHERE LECTURE_ID = ?
     `;
 
-    const [resultRows] = await connection.query(
-        selectLectureSessionQuery,
-        lectureId
-    );
+	const [resultRows] = await connection.query(selectLectureSessionQuery, lectureId);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function selectSessionClasses(connection, lectureId) {
-    const selectSessionClassesQuery = `
+	const selectSessionClassesQuery = `
         SELECT CLASS_ID, CLASS_NAME, CLASS_ROLE_ID, ROLE_DESCRIPTION
         FROM LECTURE_CLASSES
         WHERE SESSION_ID = ?;
     `;
 
-    const [resultRows] = await connection.query(
-        selectSessionClassesQuery,
-        lectureId
-    );
+	const [resultRows] = await connection.query(selectSessionClassesQuery, lectureId);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function selectLectureReviews(connection, lectureId) {
-    const selectLectureReviewQuery = `
+	const selectLectureReviewQuery = `
         SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
                 , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
         FROM LECTURE_REVIEWS AS REVIEW 
@@ -425,144 +387,114 @@ async function selectLectureReviews(connection, lectureId) {
         WHERE REVIEW.LECTURE_ID = ?;
     `;
 
-    const [resultRows] = await connection.query(
-        selectLectureReviewQuery,
-        lectureId
-    );
+	const [resultRows] = await connection.query(selectLectureReviewQuery, lectureId);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function insertLectureReview(connection, reviewParams) {
-    const insertLectureReview = `
+	const insertLectureReviewQuery = `
         INSERT INTO LECTURE_REVIEWS(LECTURE_ID, USER_ID, STAR_POINT, REVIEW_COMMENT)
         VALUES (?, ?, ?, ?);
     `;
 
-    const result = await connection.query(
-        insertLectureReview,
-        reviewParams
-    );
+	const result = await connection.query(insertLectureReviewQuery, reviewParams);
 
-    return result;
+	return result;
 }
 
 async function updateLectureReview(connection, starPoint, review, reviewId) {
-    const updateLectureReviewQuery = `
+	const updateLectureReviewQuery = `
         UPDATE LECTURE_REVIEWS
         SET STAR_POINT = ?, REVIEW_COMMENT = ?
         WHERE LECTURE_REVIEW_ID = ?;
     `;
 
-    const updateLectureRows = await connection.query(
-        updateLectureReviewQuery,
-        [starPoint, review, reviewId]
-    )
+	const updateLectureRows = await connection.query(updateLectureReviewQuery, [starPoint, review, reviewId]);
 
-    return updateLectureRows;
+	return updateLectureRows;
 }
 
 async function selectUserLectureReview(connection, userId, reviewId) {
-    const selectUserLectureReviewQuery = `
+	const selectUserLectureReviewQuery = `
         SELECT LECTURE_REVIEW_ID
         FROM LECTURE_REVIEWS
         WHERE USER_ID = ? AND LECTURE_REVIEW_ID = ?;
     `;
 
-    const [resultRows] = await connection.query(
-        selectUserLectureReviewQuery,
-        [userId, reviewId]
-    );
+	const [resultRows] = await connection.query(selectUserLectureReviewQuery, [userId, reviewId]);
 
-    return resultRows;
+	return resultRows;
 }
 
-async function deleteUserReview(connection, reviewId){
-    const deleteUserReviewQuery = `
+async function deleteUserReview(connection, reviewId) {
+	const deleteUserReviewQuery = `
         DELETE FROM LECTURE_REVIEWS WHERE LECTURE_REVIEW_ID = ?;
     `;
 
-    const deleteUserReviewResult = await connection.query(
-        deleteUserReviewQuery,
-        reviewId
-    );
+	const deleteUserReviewResult = await connection.query(deleteUserReviewQuery, reviewId);
 
-    return deleteUserReviewResult;
+	return deleteUserReviewResult;
 }
 
 async function selectLectureNotice(connection, lectureId) {
-    const selectLectureNoticeQuery = `
+	const selectLectureNoticeQuery = `
         SELECT NOTICE_ID, NOTICE_TITLE, NOTICE_CONTENT, DATE_FORMAT(CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
         FROM LECTURE_NOTICE
         WHERE LECTURE_ID = ?
     `;
 
-    const [selectUserLectureRows] = await connection.query(
-        selectLectureNoticeQuery,
-        lectureId
-    );
+	const [selectUserLectureRows] = await connection.query(selectLectureNoticeQuery, lectureId);
 
-    return selectUserLectureRows;
+	return selectUserLectureRows;
 }
 
 async function insertLectureNotice(connection, lectureNoticeParams) {
-    const insertLectureNoticeQuery  = `
+	const insertLectureNoticeQuery = `
         INSERT INTO LECTURE_NOTICE(LECTURE_ID, USER_ID, NOTICE_TITLE, NOTICE_CONTENT) VALUES (?, ?, ?, ?);
     `;
 
-    const insertLectureRow = await connection.query(
-        insertLectureNoticeQuery,
-        lectureNoticeParams
-    )
+	const insertLectureRow = await connection.query(insertLectureNoticeQuery, lectureNoticeParams);
 
-    return insertLectureRow;
+	return insertLectureRow;
 }
 
-async function selectLectureUser(connection, userId, lectureId){
-    const selectLectureUserQuery = `
+async function selectLectureUser(connection, userId, lectureId) {
+	const selectLectureUserQuery = `
         SELECT USER_ID
         FROM LECTURES
         WHERE USER_ID = ? AND LECTURE_ID = ?
     `;
 
-    const [selectLectureUserResult] = await connection.query(
-        selectLectureUserQuery,
-        [userId, lectureId]
-    );
+	const [selectLectureUserResult] = await connection.query(selectLectureUserQuery, [userId, lectureId]);
 
-    return selectLectureUserResult;
+	return selectLectureUserResult;
 }
 
 async function updateLectureNotice(connection, lectureNoticeParams) {
-    const updateLectureQuery = `
+	const updateLectureQuery = `
         UPDATE LECTURE_NOTICE
         SET NOTICE_TITLE = ?, NOTICE_CONTENT = ?
         WHERE NOTICE_ID = ?;
     `;
 
-    const updateLectureResult = await connection.query(
-        updateLectureQuery,
-        lectureNoticeParams
-    )
+	const updateLectureResult = await connection.query(updateLectureQuery, lectureNoticeParams);
 
-    return updateLectureResult;
+	return updateLectureResult;
 }
 
 async function deleteLectureNotice(connection, noticeId) {
-    const deleteNoticeQuery = `
+	const deleteNoticeQuery = `
         DELETE FROM LECTURE_NOTICE WHERE NOTICE_ID = ?;
     `;
 
-    const deleteNoticeResult = await connection.query(
-        deleteNoticeQuery,
-        noticeId
-    );
+	const deleteNoticeResult = await connection.query(deleteNoticeQuery, noticeId);
 
-    return deleteNoticeResult;
+	return deleteNoticeResult;
 }
 
 async function selectLectureInfo(connection, lectureId) {
-    const selectLectureInfoQuery = `
+	const selectLectureInfoQuery = `
     SELECT L.PRICE, U.NICK_NAME, CLASS_INFO.CNT AS CLASS_COUNT, CLASS_INFO.LECTURE_TIME AS TOTAL_TIME, L.LEARNING_LEVEL
     FROM LECTURES AS L 
     INNER JOIN USERS AS U
@@ -577,16 +509,13 @@ async function selectLectureInfo(connection, lectureId) {
     WHERE L.LECTURE_ID = ?;
     `;
 
-    const [resultRow] = await connection.query(
-        selectLectureInfoQuery,
-        lectureId
-    );
+	const [resultRow] = await connection.query(selectLectureInfoQuery, lectureId);
 
-    return resultRow;
+	return resultRow;
 }
 
 async function selectReviewsCreatedSort(connection, lectureId) {
-    const selectReviewsCreatedSortQuery = `
+	const selectReviewsCreatedSortQuery = `
         SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
                 , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
         FROM LECTURE_REVIEWS AS REVIEW 
@@ -596,16 +525,13 @@ async function selectReviewsCreatedSort(connection, lectureId) {
         ORDER BY REVIEW.CREATED_AT ASC;
     `;
 
-    const [resultRows] = await connection.query(
-        selectReviewsCreatedSortQuery,
-        lectureId
-    );
+	const [resultRows] = await connection.query(selectReviewsCreatedSortQuery, lectureId);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function selectReviewsHighGPA(connection, lectureId) {
-    const selectReviewsHighGPAQuery = `
+	const selectReviewsHighGPAQuery = `
         SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
                 , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
         FROM LECTURE_REVIEWS AS REVIEW 
@@ -615,16 +541,13 @@ async function selectReviewsHighGPA(connection, lectureId) {
         ORDER BY REVIEW.STAR_POINT DESC;
     `;
 
-    const [resultRows] = await connection.query(
-        selectReviewsHighGPAQuery,
-        lectureId
-    );
+	const [resultRows] = await connection.query(selectReviewsHighGPAQuery, lectureId);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function selectReviewsLowGPA(connection, lectureId) {
-    const selectReviewsLowGPAQuery = `
+	const selectReviewsLowGPAQuery = `
         SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
                 , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
         FROM LECTURE_REVIEWS AS REVIEW 
@@ -634,16 +557,13 @@ async function selectReviewsLowGPA(connection, lectureId) {
         ORDER BY REVIEW.STAR_POINT ASC;
     `;
 
-    const [resultRows] = await connection.query(
-        selectReviewsLowGPAQuery,
-        lectureId
-    );
+	const [resultRows] = await connection.query(selectReviewsLowGPAQuery, lectureId);
 
-    return resultRows;
+	return resultRows;
 }
 
-async function selectProgress(connection,lectureId,userId) {
-    const selectProgressQuery = `
+async function selectProgress(connection, lectureId, userId) {
+	const selectProgressQuery = `
     select 
         count(LC.CLASS_ID) as allCnt ,count(sub.CLASS_ID) as completeCnt
     from LECTURE_CLASSES LC
@@ -656,13 +576,13 @@ async function selectProgress(connection,lectureId,userId) {
 where L.LECTURE_ID = ?;
     `;
 
-    const [resultRow] = await connection.query(selectProgressQuery,[userId,lectureId]);
+	const [resultRow] = await connection.query(selectProgressQuery, [userId, lectureId]);
 
-    return resultRow;
+	return resultRow;
 }
 
-async function selectQuestionList(connection,lectureId) {
-    const getQuestionListQuery = `
+async function selectQuestionList(connection, lectureId) {
+	const getQuestionListQuery = `
     select
         L.LECTURE_ID,BOARD_ID,BOARD_TITLE,date_format(BOARDS.CREATED_AT,'%Y.%m.%d') as DATE
     from BOARDS
@@ -674,27 +594,24 @@ order by BOARDS.CREATED_AT desc
 limit 10;
     `;
 
-    const [resultRow] = await connection.query(getQuestionListQuery,lectureId);
-    return resultRow;
+	const [resultRow] = await connection.query(getQuestionListQuery, lectureId);
+	return resultRow;
 }
 
-async function selectLectureCurriculum(connection,sessionId){
-    const selectSessionClassesQuery = `
+async function selectLectureCurriculum(connection, sessionId) {
+	const selectSessionClassesQuery = `
         SELECT CLASS_ID, CLASS_NAME
         FROM LECTURE_CLASSES
         WHERE SESSION_ID = ?;
     `;
 
-    const [resultRows] = await connection.query(
-        selectSessionClassesQuery,
-        sessionId
-    );
+	const [resultRows] = await connection.query(selectSessionClassesQuery, sessionId);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function selectUserHistories(connection, userId) {
-    const selectUserHistoriesQuery = `
+	const selectUserHistoriesQuery = `
         SELECT LECTURE_GROUP.LECTURE_ID, LECTURE_GROUP.LECTURE_NAME, LECTURE_GROUP.TITLE_IMAGE, USER_HIST.COMPLETED_COUNT , LECTURE_GROUP.CLASS_COUNT
         FROM (SELECT HIST.LECTURE_ID AS LECTURE_ID, COUNT(HIST.IS_COMPLETED) AS COMPLETED_COUNT
                 FROM USER_CLASS_HISTORIES AS HIST
@@ -712,16 +629,13 @@ async function selectUserHistories(connection, userId) {
             ON USER_HIST.LECTURE_ID = LECTURE_GROUP.LECTURE_ID;
     `;
 
-    const [selectUserHistoriesResult] = await connection.query(
-        selectUserHistoriesQuery,
-        userId
-    );
+	const [selectUserHistoriesResult] = await connection.query(selectUserHistoriesQuery, userId);
 
-    return selectUserHistoriesResult;
+	return selectUserHistoriesResult;
 }
 
-async function selectLectureLateASC (connection) {
-    const query = `
+async function selectLectureLateASC(connection) {
+	const query = `
         SELECT L.LECTURE_ID, L.LECTURE_NAME, L.TITLE_IMAGE, L.STAR_POINT,L.PRICE, U.NICK_NAME
         FROM LECTURES AS L
             INNER JOIN USERS AS U
@@ -729,13 +643,13 @@ async function selectLectureLateASC (connection) {
         ORDER BY L.CREATED_AT ASC LIMIT 5;
     `;
 
-    const [result] = await connection.query(query);
+	const [result] = await connection.query(query);
 
-    return result
+	return result;
 }
 
-async function selectLecturePopularDESC (connection) {
-    const query = `
+async function selectLecturePopularDESC(connection) {
+	const query = `
         SELECT L.LECTURE_ID, L.LECTURE_NAME, L.TITLE_IMAGE, L.PRICE, L.STAR_POINT, U.NICK_NAME
         FROM LECTURES AS L
             INNER JOIN USERS AS U
@@ -743,60 +657,60 @@ async function selectLecturePopularDESC (connection) {
         ORDER BY L.STAR_POINT DESC LIMIT 5;
     `;
 
-    const [result] = await connection.query(query);
+	const [result] = await connection.query(query);
 
-    return result;
+	return result;
 }
 
 module.exports = {
-    selectUserHaveLecture,
-    selectLecture,
-    selectLectureHeader,
-    selectLectureStudentCount,
-    selectLecturePreviewCount,
-    selectLectureCategory,
-    selectLectureTags,
+	selectUserHaveLecture,
+	selectLecture,
+	selectLectureHeader,
+	selectLectureStudentCount,
+	selectLecturePreviewCount,
+	selectLectureCategory,
+	selectLectureTags,
 
-    selectLectureIntroduction,
-    selectLectureList,
-    selectLectureTag,
-    selectLectureMiddle,
-    selectLectureSession,
-    selectSessionClasses,
+	selectLectureIntroduction,
+	selectLectureList,
+	selectLectureTag,
+	selectLectureMiddle,
+	selectLectureSession,
+	selectSessionClasses,
 
-    checkBigCategory,
-    selectTopLectureList,
-    selectTopLectureMiddle,
-    selectTopLectureTag,
-    selectMiddleLectureList,
-    selectMiddleLecture,
-    selectMiddleLectureTag,
-    checkMiddleCategory,
+	checkBigCategory,
+	selectTopLectureList,
+	selectTopLectureMiddle,
+	selectTopLectureTag,
+	selectMiddleLectureList,
+	selectMiddleLecture,
+	selectMiddleLectureTag,
+	checkMiddleCategory,
 
-    selectLectureReviews,
-    insertLectureReview,
-    updateLectureReview,
-    selectUserLectureReview,
-    deleteUserReview,
-    selectLectureNotice,
-    insertLectureNotice,
-    selectLectureUser,
-    updateLectureNotice,
-    deleteLectureNotice,
-    selectLectureInfo,
+	selectLectureReviews,
+	insertLectureReview,
+	updateLectureReview,
+	selectUserLectureReview,
+	deleteUserReview,
+	selectLectureNotice,
+	insertLectureNotice,
+	selectLectureUser,
+	updateLectureNotice,
+	deleteLectureNotice,
+	selectLectureInfo,
 
-    selectReviewsCreatedSort,
-    selectReviewsHighGPA,
-    selectReviewsLowGPA,
-    buildQuery,
-    filterLectureList,
-    filterBigLectureList,
-    filterMiddleLectureList,
-    selectProgress,
-    selectQuestionList,
-    selectLectureCurriculum,
-    selectUserHistories,
+	selectReviewsCreatedSort,
+	selectReviewsHighGPA,
+	selectReviewsLowGPA,
+	buildQuery,
+	filterLectureList,
+	filterBigLectureList,
+	filterMiddleLectureList,
+	selectProgress,
+	selectQuestionList,
+	selectLectureCurriculum,
+	selectUserHistories,
 
-    selectLectureLateASC,
-    selectLecturePopularDESC
+	selectLectureLateASC,
+	selectLecturePopularDESC,
 };

@@ -111,7 +111,7 @@ module.exports = {
     INSERT_WISH_LIST_ITEM_FAIL:{ "isSuccess": false, "code": 3050, "message":"위시리스트 아이템 저장에 실패 하였습니다."},
 
     DELETE_WISH_LIST_ITEM_FAIL:{ "isSuccess": false, "code": 3061, "message":"위시리스트 아이템 삭제에 실패 하였습니다."},
-
+    UPDATE_REFRESH_TOKEN_FAIL:{ "isSuccess": false, "code": 3062, "message":"REFRESH TOKEN을 업데이트하는데 실패하였습니다."},
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
     SERVER_ERROR : { "isSuccess": false, "code": 4001, "message": "서버 에러"},

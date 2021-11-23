@@ -1,424 +1,375 @@
-const lectureProvider = require("../../app/Lecture/lectureProvider");
-const lectureService = require("../../app/Lecture/lectureService");
+const lectureProvider = require("./lectureProvider");
+const lectureService = require("./lectureService");
 const baseResponse = require("../../../config/baseResponseStatus");
-const {response, errResponse} = require("../../../config/response");
-
+const { response, errResponse } = require("../../../config/response");
 
 /**
  * API No.
  * API Name : 강의 목록 조회 API
  * [GET] /inflearn/courses/lectures
  */
-exports.getAllLectureList = async function(req,res){
-    /**
-     * Query String: tagName
-     */
-    const tagName = req.query.skill;
+exports.getAllLectureList = async function (req, res) {
+	/**
+	 * Query String: tagName
+	 */
+	const tagName = req.query.skill;
 
-    const lectureResult = await lectureProvider.getFilterLectureList(tagName);
+	const lectureResult = await lectureProvider.getFilterLectureList(tagName);
 
-    return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"),lectureResult));
-
-}
+	return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"), lectureResult));
+};
 /**
  * API No.
  * API Name : TOP 카테고리 별 강의 조회 API
  * [GET] /inflearn/courses/lectures/{bigCategoryName}
  */
-exports.getBigLectureList = async function(req,res){
-    /**
-     * Path Variable(타겟이 있는경우): bigCategoryName
-     * Query String : tagName
-     */
-    const bigCategoryName = req.params.bigCategoryName;
-    const tagName = req.query.skill;
+exports.getBigLectureList = async function (req, res) {
+	/**
+	 * Path Variable(타겟이 있는경우): bigCategoryName
+	 * Query String : tagName
+	 */
+	const { bigCategoryName } = req.params;
+	const tagName = req.query.skill;
 
-    if(!bigCategoryName)
-        return res.redirect('/inflearn/courses/lectures');
+	if (!bigCategoryName) return res.redirect("/inflearn/courses/lectures");
 
-    const isExist = await lectureProvider.checkBigCategoryList(bigCategoryName);
+	const isExist = await lectureProvider.checkBigCategoryList(bigCategoryName);
 
-    if(isExist.length < 1)
-        return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
+	if (isExist.length < 1) return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
 
-    const lectureResult = await lectureProvider.getLectureList(bigCategoryName,tagName);
+	const lectureResult = await lectureProvider.getLectureList(bigCategoryName, tagName);
 
-    return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"),lectureResult));
-}
+	return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"), lectureResult));
+};
 
 /**
  * API No.
  * API Name : middle 카테고리 별 강의 조회 API
  * [GET] /inflearn/courses/lectures/{bigCategoryName}/{middleCategoryName}
  */
-exports.getMiddleLectureList = async function(req,res){
-    /**
-     * Path Variable(타겟이 있는경우): bigCategoryName,middleCategoryName
-     * Query String : tagName
-     */
-    const bigCategoryName = req.params.bigCategoryName;
-    const middleCategoryName = req.params.middleCategoryName;
+exports.getMiddleLectureList = async function (req, res) {
+	/**
+	 * Path Variable(타겟이 있는경우): bigCategoryName,middleCategoryName
+	 * Query String : tagName
+	 */
+	const { bigCategoryName } = req.params;
+	const { middleCategoryName } = req.params;
 
-    const tagName = req.query.skill;
+	const tagName = req.query.skill;
 
-    if(!bigCategoryName)
-        return res.redirect('/inflearn/courses/lectures');
-    else if(!middleCategoryName)
-        return res.redirect('/inflearn/courses/lectures/:bigCategoryName')
+	if (!bigCategoryName) return res.redirect("/inflearn/courses/lectures");
+	if (!middleCategoryName) return res.redirect("/inflearn/courses/lectures/:bigCategoryName");
 
-    const isExist = await lectureProvider.checkMiddleCategoryList(bigCategoryName,middleCategoryName);
+	const isExist = await lectureProvider.checkMiddleCategoryList(bigCategoryName, middleCategoryName);
 
-    if(isExist.length < 1)
-        return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
+	if (isExist.length < 1) return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
 
-    const lectureResult = await lectureProvider.getMiddleLectureList(bigCategoryName,middleCategoryName,tagName);
+	const lectureResult = await lectureProvider.getMiddleLectureList(bigCategoryName, middleCategoryName, tagName);
 
-    return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"),lectureResult));
-}
+	return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"), lectureResult));
+};
 
-exports.getUserLecture = async function(req, res) {
-    const token = req.verifiedToken;
+exports.getUserLecture = async function (req, res) {
+	const token = req.verifiedToken;
 
-    const userId = token.userId;
+	const { userId } = token;
 
-    const lectureId = req.params['lectureId'];
+	const { lectureId } = req.params;
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    const getUserLecture = await lectureService.userLectureCheck(userId, lectureId);
+	const getUserLecture = await lectureService.userLectureCheck(userId, lectureId);
 
-    return res.send(getUserLecture);
-}
+	return res.send(getUserLecture);
+};
 
-exports.getLectureHeaderItems = async function(req, res) {
-    const lectureId = req.params['lectureId'];
+exports.getLectureHeaderItems = async function (req, res) {
+	const { lectureId } = req.params;
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	const getUserLectureHeaderResult = await lectureService.getLectureHeader(lectureId);
 
-    const getUserLectureHeaderResult = await lectureService.getLectureHeader(lectureId);
+	return res.send(getUserLectureHeaderResult);
+};
 
-    return res.send(getUserLectureHeaderResult);
-}
+exports.getLectureIntroduction = async function (req, res) {
+	const { lectureId } = req.params;
 
-exports.getLectureIntroduction = async function(req, res) {
-    const lectureId = req.params['lectureId'];
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	const lectureIntroduction = await lectureProvider.selectLectureIntroduction(lectureId);
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	if (!lectureIntroduction) return res.send(errResponse(baseResponse.GET_LECTURE_INTRODUCTION_FAIL));
 
-    const lectureIntroduction = await lectureProvider.selectLectureIntroduction(lectureId);
+	return res.send(response(baseResponse.SUCCESS("강의 소개 조회 성공"), lectureIntroduction));
+};
 
-    if(!lectureIntroduction) return res.send(errResponse(baseResponse.GET_LECTURE_INTRODUCTION_FAIL));
+exports.getSessionClasses = async function (req, res) {
+	const { lectureId } = req.params;
 
-    return res.send(response(baseResponse.SUCCESS("강의 소개 조회 성공"), lectureIntroduction));
-}
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-exports.getSessionClasses = async function(req, res) {
-    const lectureId = req.params['lectureId'];
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
+	const sessionClasses = await lectureService.getSessionClasses(lectureId);
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	return res.send(sessionClasses);
+};
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+exports.getLectureReviews = async function (req, res) {
+	const { lectureId } = req.params;
 
-    const sessionClasses = await lectureService.getSessionClasses(lectureId);
+	const sortQuery = req.query.sort;
+	let lectureReviews;
 
-    return res.send(sessionClasses);
-}
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-exports.getLectureReviews = async function(req, res) {
-    const lectureId = req.params['lectureId'];
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    const sortQuery = req.query.sort;
-    let lectureReviews;
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	if (!sortQuery) {
+		lectureReviews = await lectureProvider.selectLectureReviews(lectureId);
+	} else {
+		switch (sortQuery) {
+			case "created":
+				lectureReviews = await lectureProvider.selectReviewCreatedSort(lectureId);
+				break;
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+			case "highGPA":
+				lectureReviews = await lectureProvider.selectReviewHighGPA(lectureId);
+				break;
 
+			case "lowGPA":
+				lectureReviews = await lectureProvider.selectReviewLowGPA(lectureId);
+				break;
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+			default:
+				return res.send(errResponse(baseResponse.SERVER_ERROR));
+		}
+	}
 
-    if(!sortQuery){
-        lectureReviews = await lectureProvider.selectLectureReviews(lectureId);
-    }else {
-        switch (sortQuery) {
-            case 'created':
-                lectureReviews = await lectureProvider.selectReviewCreatedSort(lectureId);
-                break;
+	return res.send(response(baseResponse.SUCCESS("강의 리뷰 조회 성공"), lectureReviews));
+};
 
-            case 'highGPA':
-                lectureReviews = await lectureProvider.selectReviewHighGPA(lectureId);
-                break;
+exports.postLectureReview = async function (req, res) {
+	const token = req.verifiedToken;
+	const { lectureId } = req.params;
+	const { userId } = token;
+	const { starPoint, review } = req.body;
 
-            case 'lowGPA':
-                lectureReviews = await lectureProvider.selectReviewLowGPA(lectureId);
-                break;
-        }
-    }
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    return res.send(response(baseResponse.SUCCESS("강의 리뷰 조회 성공"), lectureReviews));
-}
+	if (!review) return res.send(errResponse(baseResponse.LECTURE_REVIEW_EMPTY));
 
-exports.postLectureReview = async function(req, res) {
-    const token = req.verifiedToken;
-    const lectureId = req.params['lectureId'];
-    const userId = token.userId;
-    const {starPoint, review} = req.body;
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
 
-    if(!review)
-        return res.send(errResponse(baseResponse.LECTURE_REVIEW_EMPTY));
+	if (checkUserLecture.length < 1) return res.send(errResponse(baseResponse.CHECK_USER_LECTURES_FAIL));
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	const insertReviewResult = await lectureService.postLectureReview(lectureId, userId, starPoint, review);
 
-    const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
+	return res.send(insertReviewResult);
+};
 
-    if(checkUserLecture.length < 1)
-        return res.send(errResponse(baseResponse.CHECK_USER_LECTURES_FAIL));
+exports.putLectureReview = async function (req, res) {
+	const { lectureId } = req.params;
+	const token = req.verifiedToken;
+	const { reviewId } = req.params;
+	const { userId } = token;
+	const { starPoint, review } = req.body;
 
-    const insertReviewResult = await lectureService.postLectureReview(lectureId, userId, starPoint, review);
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    return res.send(insertReviewResult);
-}
+	if (!review) return res.send(errResponse(baseResponse.LECTURE_REVIEW_EMPTY));
 
-exports.putLectureReview = async function(req, res) {
-    const lectureId = req.params['lectureId'];
-    const token = req.verifiedToken;
-    const reviewId = req.params['reviewId'];
-    const userId = token.userId;
-    const {starPoint, review} = req.body;
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	const checkUserReviewRow = await lectureProvider.checkUserLectureReview(userId, reviewId);
 
-    if(!review)
-        return res.send(errResponse(baseResponse.LECTURE_REVIEW_EMPTY));
+	if (checkUserReviewRow.length < 1) return res.send(errResponse(baseResponse.USER_REVIEW_NOT_EXIST));
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	const updateReviewResult = await lectureService.putLectureReview(starPoint, review, reviewId);
 
-    const checkUserReviewRow = await lectureProvider.checkUserLectureReview(userId, reviewId);
+	return res.send(updateReviewResult);
+};
 
-    if(checkUserReviewRow.length < 1)
-        return res.send(errResponse(baseResponse.USER_REVIEW_NOT_EXIST));
+exports.deleteLectureReview = async function (req, res) {
+	const { lectureId } = req.params;
+	const token = req.verifiedToken;
+	const { reviewId } = req.params;
+	const { userId } = token;
 
-    const updateReviewResult = await lectureService.putLectureReview(starPoint, review, reviewId);
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    return  res.send(updateReviewResult);
-}
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-exports.deleteLectureReview = async function(req, res) {
-    const lectureId = req.params['lectureId'];
-    const token = req.verifiedToken;
-    const reviewId = req.params['reviewId'];
-    const userId = token.userId;
+	const checkUserReviewRow = await lectureProvider.checkUserLectureReview(userId, reviewId);
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
+	if (checkUserReviewRow.length < 1) return res.send(errResponse(baseResponse.USER_REVIEW_NOT_EXIST));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	const deleteReviewResult = await lectureService.deleteLectureReview(reviewId);
 
-    const checkUserReviewRow = await lectureProvider.checkUserLectureReview(userId, reviewId);
+	return res.send(deleteReviewResult);
+};
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+exports.getLectureNotice = async function (req, res) {
+	const { lectureId } = req.params;
 
-    if(checkUserReviewRow.length < 1)
-        return res.send(errResponse(baseResponse.USER_REVIEW_NOT_EXIST));
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    const deleteReviewResult = await lectureService.deleteLectureReview(reviewId);
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    return  res.send(deleteReviewResult);
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
+	const getLectureNoticeResult = await lectureProvider.selectLectureNotice(lectureId);
 
-}
+	return res.send(response(baseResponse.SUCCESS("강의 공지 조회에 성공"), getLectureNoticeResult));
+};
 
-exports.getLectureNotice = async function(req, res) {
-    const lectureId = req.params['lectureId'];
+exports.postLectureNotice = async function (req, res) {
+	const token = req.verifiedToken;
+	const { lectureId } = req.params;
+	const { userId } = token;
+	const { title, content } = req.body;
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	if (!title) return res.send(errResponse(baseResponse.LECTURE_NOTICE_TITLE_EMPTY));
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    const getLectureNoticeResult = await lectureProvider.selectLectureNotice(lectureId);
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    return res.send(response(baseResponse.SUCCESS("강의 공지 조회에 성공"), getLectureNoticeResult));
-}
+	const postLectureResult = await lectureService.insertLectureNotice(lectureId, userId, title, content);
 
-exports.postLectureNotice = async function(req, res) {
-    const token = req.verifiedToken;
-    const lectureId = req.params['lectureId'];
-    const userId = token.userId;
-    const {title, content} = req.body;
+	return res.send(postLectureResult);
+};
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+exports.putLectureNotice = async function (req, res) {
+	const token = req.verifiedToken;
+	const { lectureId } = req.params;
+	const { noticeId } = req.params;
+	const { userId } = token;
+	const { title, content } = req.body;
 
-    if(!title)
-        return res.send(errResponse(baseResponse.LECTURE_NOTICE_TITLE_EMPTY));
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	if (!title) return res.send(errResponse(baseResponse.LECTURE_NOTICE_TITLE_EMPTY));
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    const postLectureResult = await lectureService.insertLectureNotice(lectureId, userId, title, content);
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    return res.send(postLectureResult);
-}
+	const putLectureResult = await lectureService.updateLectureNotice(userId, lectureId, noticeId, title, content);
 
-exports.putLectureNotice = async function(req, res){
-    const token = req.verifiedToken;
-    const lectureId = req.params['lectureId'];
-    const noticeId = req.params['noticeId'];
-    const userId = token.userId;
-    const {title, content} = req.body;
+	return res.send(putLectureResult);
+};
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+exports.deleteLectureNotice = async function (req, res) {
+	const token = req.verifiedToken;
+	const { lectureId } = req.params;
+	const { noticeId } = req.params;
+	const { userId } = token;
 
-    if(!title)
-        return res.send(errResponse(baseResponse.LECTURE_NOTICE_TITLE_EMPTY));
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    const putLectureResult = await lectureService.updateLectureNotice(userId, lectureId, noticeId, title, content);
+	const deleteLectureResult = await lectureService.deleteLectureNotice(userId, lectureId, noticeId);
 
-    return res.send(putLectureResult);
-}
+	return res.send(deleteLectureResult);
+};
 
-exports.deleteLectureNotice = async function(req, res){
-    const token = req.verifiedToken;
-    const lectureId = req.params['lectureId'];
-    const noticeId = req.params['noticeId'];
-    const userId = token.userId;
+exports.getLectureInfo = async function (req, res) {
+	const { lectureId } = req.params;
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	if (checkLectureRow.length < 1) return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    const deleteLectureResult = await lectureService.deleteLectureNotice(userId, lectureId, noticeId);
+	const getLectureInfoResult = await lectureProvider.selectLectureInfo(lectureId);
+	return res.send(response(baseResponse.SUCCESS("조회 성공 하였습니다."), getLectureInfoResult));
+};
 
-    return res.send(deleteLectureResult);
-}
+exports.getDashboardHeader = async function (req, res) {
+	const token = req.verifiedToken;
+	const { userId } = token;
 
-exports.getLectureInfo = async function(req, res){
-    const lectureId = req.params['lectureId'];
+	const { lectureId } = req.params;
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+	const getHeaderResult = await lectureProvider.getDashboardHeader(lectureId, userId);
 
-    if(checkLectureRow.length < 1)
-        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+	return res.send(getHeaderResult);
+};
 
-    const getLectureInfoResult = await lectureProvider.selectLectureInfo(lectureId);
-    console.log('test', getLectureInfoResult);
-    return res.send(response(baseResponse.SUCCESS("조회 성공 하였습니다."), getLectureInfoResult));
+exports.getDashboardQuestion = async function (req, res) {
+	const token = req.verifiedToken;
+	const { userId } = token;
 
-}
+	const { lectureId } = req.params;
 
-exports.getDashboardHeader = async function(req,res){
-    const token = req.verifiedToken;
-    const userId = token.userId;
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-    const lectureId = req.params.lectureId;
+	const questionCntResult = await lectureProvider.getDashboardQuestionCnt(lectureId, userId);
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+	return res.send(questionCntResult);
+};
 
-    const getHeaderResult = await lectureProvider.getDashboardHeader(lectureId,userId);
+exports.getDashboardCurriculum = async function (req, res) {
+	const token = req.verifiedToken;
+	const { userId } = token;
 
-    return res.send(getHeaderResult);
+	const { lectureId } = req.params;
 
-}
+	if (!lectureId) return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
-exports.getDashboardQuestion = async function(req,res){
-    const token = req.verifiedToken;
-    const userId = token.userId;
+	const sessionClasses = await lectureProvider.getDashboardCurriculum(lectureId, userId);
 
-    const lectureId = req.params.lectureId;
+	return res.send(sessionClasses);
+};
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+exports.getUserHistories = async function (req, res) {
+	const token = req.verifiedToken;
+	const { userId } = token;
 
-    const questionCntResult = await lectureProvider.getDashboardQuestionCnt(lectureId,userId);
+	const userHistories = await lectureProvider.getUserHistories(userId);
 
-    return res.send(questionCntResult);
-}
+	return res.send(response(baseResponse.SUCCESS("유저 기록 조회 성공"), userHistories));
+};
 
-exports.getDashboardCurriculum = async function(req,res){
-    const token = req.verifiedToken;
-    const userId = token.userId;
+exports.getLectureLateASC = async function (req, res) {
+	const result = await lectureProvider.getLectureLateASC();
 
-    const lectureId = req.params.lectureId;
+	return res.send(response(baseResponse.SUCCESS("최신 강의 조회 성공"), result));
+};
 
-    if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+exports.getLecturePopularDESC = async function (req, res) {
+	const result = await lectureProvider.getLecturePopular();
 
-    const sessionClasses = await lectureProvider.getDashboardCurriculum(lectureId,userId);
-
-    return res.send(sessionClasses);
-
-}
-
-exports.getUserHistories = async function(req, res) {
-    const token = req.verifiedToken;
-    const userId = token.userId;
-
-    const userHistories = await lectureProvider.getUserHistories(userId);
-
-    return res.send(response(baseResponse.SUCCESS("유저 기록 조회 성공"), userHistories));
-}
-
-exports.getLectureLateASC = async function(req, res) {
-    const result = await lectureProvider.getLectureLateASC();
-
-    return res.send(response(baseResponse.SUCCESS("최신 강의 조회 성공"), result));
-}
-
-exports.getLecturePopularDESC = async function(req, res) {
-    const result = await lectureProvider.getLecturePopular();
-
-    return res.send(response(baseResponse.SUCCESS("인기 강의 조회 성공"), result));
-}
+	return res.send(response(baseResponse.SUCCESS("인기 강의 조회 성공"), result));
+};

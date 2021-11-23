@@ -1,5 +1,5 @@
 async function selectWatchedVideo(connection, userId, classId) {
-    const selectWatchedVideoQuery = `
+	const selectWatchedVideoQuery = `
         SELECT CLASS_HIST.HISTORY_ID, CLASS_HIST.CLASS_ID, CLASS_HIST.WATCHED_TIME, CLASS.CLASS_VIDEO_URL
         FROM USER_CLASS_HISTORIES AS CLASS_HIST
                  INNER JOIN LECTURE_CLASSES AS CLASS
@@ -8,45 +8,36 @@ async function selectWatchedVideo(connection, userId, classId) {
           AND CLASS_HIST.CLASS_ID = ?
     `;
 
-    const [resultRows] = await connection.query(
-        selectWatchedVideoQuery,
-        [userId, classId]
-    );
+	const [resultRows] = await connection.query(selectWatchedVideoQuery, [userId, classId]);
 
-    return resultRows
+	return resultRows;
 }
 
 async function insertWatchedVideo(connection, videoParams) {
-    const insertWatchedVideoQuery = `
+	const insertWatchedVideoQuery = `
         INSERT INTO USER_CLASS_HISTORIES(USER_ID, LECTURE_ID, CLASS_ID, WATCHED_TIME)
             VALUES (?, ?, ?, ?)
     `;
 
-    const [resultRows] = await connection.query(
-        insertWatchedVideoQuery,
-        videoParams
-    );
+	const [resultRows] = await connection.query(insertWatchedVideoQuery, videoParams);
 
-    return resultRows
+	return resultRows;
 }
 
 async function updateWatchedVideo(connection, updateHistoryParams) {
-    const updateWatchedVideoQuery = `
+	const updateWatchedVideoQuery = `
         UPDATE USER_CLASS_HISTORIES
         SET WATCHED_TIME = ?
         WHERE HISTORY_ID = ?
     `;
 
-    const [resultRows] = await connection.query(
-        updateWatchedVideoQuery,
-        updateHistoryParams
-    );
+	const [resultRows] = await connection.query(updateWatchedVideoQuery, updateHistoryParams);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function selectUserLectureList(connection, userParams) {
-    const selectUserLectureListQuery = `
+	const selectUserLectureListQuery = `
         SELECT DISTINCT CLASS.CLASS_ID, CLASS.CLASS_NAME, CLASS.CLASS_TIME, IFNULL(CLASS_HIST.IS_COMPLETED, 0) AS IS_COMPLETED
         FROM LECTURE_CLASSES AS CLASS
             LEFT OUTER JOIN (SELECT CLASS_ID, IS_COMPLETED
@@ -56,34 +47,27 @@ async function selectUserLectureList(connection, userParams) {
        WHERE CLASS.SESSION_ID = ?;
     `;
 
-    const [resultRows] = await connection.query(
-        selectUserLectureListQuery,
-        userParams
-    );
+	const [resultRows] = await connection.query(selectUserLectureListQuery, userParams);
 
-    return resultRows;
+	return resultRows;
 }
 
 async function updateClassLearningInfo(connection, historyId) {
-    const updateUserHistoryQuery = `
+	const updateUserHistoryQuery = `
         UPDATE USER_CLASS_HISTORIES
         SET IS_COMPLETED = 1
         WHERE HISTORY_ID = ?;
     `;
 
-    const [resultRow] = await connection.query(
-        updateUserHistoryQuery,
-        historyId
-    );
+	const [resultRow] = await connection.query(updateUserHistoryQuery, historyId);
 
-    return resultRow;
+	return resultRow;
 }
 
 module.exports = {
-    selectWatchedVideo,
-    insertWatchedVideo,
-    updateWatchedVideo,
-    selectUserLectureList,
-    updateClassLearningInfo
-}
-
+	selectWatchedVideo,
+	insertWatchedVideo,
+	updateWatchedVideo,
+	selectUserLectureList,
+	updateClassLearningInfo,
+};
