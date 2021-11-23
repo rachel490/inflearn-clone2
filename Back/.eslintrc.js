@@ -11,6 +11,10 @@ module.exports = {
         "ecmaVersion": 13,
         "sourceType": "script"
     },
+    "env": {
+        "browser": flase,
+        "node": true
+    },
     "settings": {
         "import/resolver": {
         "node": {
