@@ -1,7 +1,8 @@
 module.exports = {
     "env": {
-        "browser": true,
-        "es2021": true
+        "browser": false,
+        "es2021": true,
+        "node": true
     },
     "extends": [
         "airbnb-base", 
@@ -10,10 +11,6 @@ module.exports = {
     "parserOptions": {
         "ecmaVersion": 13,
         "sourceType": "script"
-    },
-    "env": {
-        "browser": flase,
-        "node": true
     },
     "settings": {
         "import/resolver": {
@@ -24,7 +21,6 @@ module.exports = {
     },
     "rules":{
         "no-use-before-define":"error",
-        "no-unreachable":"error",
         "no-shadow":"error",
         "no-plusplus":"off",
         "no-param-reassign":"off",
