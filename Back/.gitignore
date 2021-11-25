@@ -116,3 +116,5 @@ log/*.json
 file/
 
 database.js
+
+.vscode/
